@@ -23,12 +23,6 @@ public class BookController {
         return bookService.getBookById(id);
     }
 
-
-    @GetMapping("/search")
-    public Book getBookByName(@RequestParam("name") String name) {
-        return bookService.findBookByName(name);
-    }
-
     @PostMapping
     public Book createBook(@RequestBody Book book) {
         return bookService.saveBook(book);
@@ -39,16 +33,8 @@ public class BookController {
         bookService.deleteBookById(id);
     }
 
-    @GetMapping("/search-by-writer")
-    public Book getBookByWrite(@RequestParam("writer") String writer) {
-        return bookService.findBookByWriter(writer);
-    }
-
     @PutMapping("/{bookId}")
     public Book updateBookById(@PathVariable("bookId") Long id, @RequestBody Book book) {
         return bookService.updateBookById(id, book);
     }
-
-
-
 }

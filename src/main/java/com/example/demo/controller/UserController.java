@@ -1,12 +1,10 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Book;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @RestController
@@ -39,12 +37,6 @@ public class UserController {
     public User getUserById(@PathVariable("userId") Long userId) {
         return userService.getUserById(userId);
     }
-
-    @GetMapping("/search")
-    public User getUserByFirsName(@RequestParam("firstName") String firstName) {
-        return userService.getUserByFirstName(firstName);
-    }
-
 
     @DeleteMapping("/{userId}")
     public void deleteUserById(@PathVariable("userId") Long userId) {

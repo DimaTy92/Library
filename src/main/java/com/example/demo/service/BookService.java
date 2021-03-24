@@ -9,13 +9,9 @@ public interface BookService {
 
     Book getBookById(Long id);
 
-    Book findBookByName(String name);
-
     Book saveBook(Book book);
 
     void deleteBookById(Long id);
-
-    Book findBookByWriter(String writer);
 
     Book updateBookById(Long id, Book book);
 }

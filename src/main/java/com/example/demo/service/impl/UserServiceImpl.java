@@ -2,18 +2,19 @@ package com.example.demo.service.impl;
 
 import com.example.demo.entity.Book;
 import com.example.demo.entity.User;
+import com.example.demo.exception.AlreadyReservedException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
 
+    private static final String USER_NOT_FOUND = "User not found with id {%d}";
+    private static final String BOOK_NOT_FOUND = "Book not found with id {%d}";
+
     @Override
+    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
@@ -37,12 +42,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean takeBook(Long userId, Long bookId) {
-        //todo Change to custom exception
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Such user does not exist"));
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Such book does not exist"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND, userId)));
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException(String.format(BOOK_NOT_FOUND, bookId)));
 
         if (Objects.nonNull(book.getUser())) {
-            throw new RuntimeException("The book is already reserved");
+            throw new AlreadyReservedException("The book is already reserved");
         }
         user.getBooks().add(book);
         book.setUser(user);
@@ -52,10 +58,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean freeBook(Long userId, Long bookId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Such user does not exist"));
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Such book does not exist"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException(String.format(USER_NOT_FOUND, userId)));
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException(String.format(USER_NOT_FOUND, bookId)));
         if (!user.getBooks().contains(book)) {
-            throw new RuntimeException("User does not take this book");
+            throw new NotFoundException(String.format("User with id: %d does not take book with id: %d ", userId, bookId));
         }
         user.getBooks().remove(book);
         book.setUser(null);
@@ -63,13 +71,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("There is no such user's 'id' "));
-    }
-
-    @Override
-    public User getUserByFirstName(String firstName) {
-       return userRepository.findUserByFirstName(firstName);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND, userId)));
     }
 
     @Override

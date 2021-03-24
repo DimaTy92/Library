@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 import javax.persistence.*;
 
 @Getter
@@ -27,7 +26,6 @@ public class Book {
 
     @Column(name = "WRITER")
     private String writer;
-
 
     @ManyToOne
     @JsonIgnore
